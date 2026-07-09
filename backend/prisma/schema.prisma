@@ -20,7 +20,7 @@ enum AuthProvider {
 model User {
   id              String       @id @default(uuid())
   email           String       @unique
-  passwordHash    String?
+  password        String
   isEmailVerified Boolean      @default(false)
   provider        AuthProvider @default(EMAIL)
   createdAt       DateTime     @default(now())
