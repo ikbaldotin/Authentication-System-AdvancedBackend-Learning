@@ -13,5 +13,9 @@ export const registerUserSchema = z
     path: ["confirmPassword"],
     message: "Password and ConfirmPassword do not match",
   });
-
+export const loginUserSchema = z.object({
+  email: z.email("Invalid email").trim().toLowerCase(),
+  password: z.string(),
+});
+export type logingUserDTO = z.infer<typeof loginUserSchema>;
 export type registerUserDTO = z.infer<typeof registerUserSchema>;
