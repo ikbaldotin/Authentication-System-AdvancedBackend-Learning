@@ -6,9 +6,11 @@ import cookieParser from "cookie-parser";
 import { globalErrorHandler } from "./middleware/error.middleware.js";
 import { AppError } from "./utils/errors/AppError.js";
 import authRouter from "./modules/auth/auth.route.js";
+import { requestLogger } from "./middleware/request-logger.middleware.js";
 export const app = express();
 // app.set("trust proxy", 1);
 app.use(helmet());
+app.use(requestLogger);
 app.use(
   cors({
     origin: env.FRONTEND_URL,

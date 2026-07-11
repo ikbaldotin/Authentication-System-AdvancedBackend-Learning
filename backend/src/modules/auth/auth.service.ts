@@ -8,8 +8,9 @@ import { comparePassword, hashPassword } from "../../utils/auth/password.js";
 import { AppError } from "../../utils/errors/AppError.js";
 import { IAuthRepository } from "./auth.interface.js";
 import { sanitizeUserResponse } from "./auth.response.js";
-import { createUserType } from "./auth.types.js";
+
 import { env } from "../../config/env.config.js";
+import { UserType } from "./auth.types.js";
 
 export class AuthService {
   constructor(private authRepo: IAuthRepository) {}
@@ -79,5 +80,13 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
+  }
+  async getLoggedInUser(data: UserType) {
+    const user = await this.authRepo.findUserById(data.userId);
+
+    if (!user) {
+      throw new AppError("user not found", 404);
+    }
+    return user;
   }
 }
