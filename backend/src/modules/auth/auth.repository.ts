@@ -6,6 +6,7 @@ import {
   createSessionType,
   createUserType,
   findUserByIdType,
+  updateSessionType,
 } from "./auth.types.js";
 
 export class AuthRepository implements IAuthRepository {
@@ -44,5 +45,71 @@ export class AuthRepository implements IAuthRepository {
       },
     });
     return user;
+  }
+  async findSessionById(sessionId: string): Promise<Session | null> {
+    const session = await prisma.session.findUnique({
+      where: {
+        id: sessionId,
+      },
+    });
+    return session;
+  }
+  async revokedUserAllSession(userId: string): Promise<void> {
+    await prisma.session.updateMany({
+      where: {
+        userId,
+      },
+      data: {
+        isRevoked: true,
+      },
+    });
+  }
+  async updateSession(
+    sessionId: string,
+    data: updateSessionType,
+  ): Promise<Session> {
+    const session = await prisma.session.update({
+      where: {
+        id: sessionId,
+      },
+      data: {
+        refreshTokenHash: data.hashedRefreshToken,
+        expiresAt: data.newRefreshTokenExpiryAt,
+      },
+    });
+    return session;
+  }
+  async findSessionByUserAndSessionId(
+    userId: string,
+    sessionId: string,
+  ): Promise<Session | null> {
+    const session = await prisma.session.findFirst({
+      where: {
+        userId,
+        id: sessionId,
+      },
+    });
+    return session;
+  }
+
+  async deleteSession(sessionId: string): Promise<void> {
+    await prisma.session.updateMany({
+      where: {
+        id: sessionId,
+      },
+      data: {
+        isDeleted: true,
+      },
+    });
+  }
+  async deleteUserAllSession(userId: string): Promise<void> {
+    await prisma.session.updateMany({
+      where: {
+        userId,
+      },
+      data: {
+        isDeleted: true,
+      },
+    });
   }
 }

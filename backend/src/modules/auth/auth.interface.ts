@@ -3,11 +3,22 @@ import {
   createSessionType,
   createUserType,
   findUserByIdType,
+  updateSessionType,
 } from "./auth.types.js";
 
 export interface IAuthRepository {
   findUserByEmail(email: string): Promise<User | null>;
   findUserById(userId: string): Promise<findUserByIdType | null>;
+  findSessionById(sessionId: string): Promise<Session | null>;
+  findSessionByUserAndSessionId(
+    userId: string,
+    sessionId: string,
+  ): Promise<Session | null>;
+
   createUser(data: createUserType): Promise<User>;
+  revokedUserAllSession(userId: string): Promise<void>;
   createSession(data: createSessionType): Promise<Session>;
+  updateSession(sessionId: string, data: updateSessionType): Promise<Session>;
+  deleteSession(sessionId: string): Promise<void>;
+  deleteUserAllSession(userId: string): Promise<void>;
 }
