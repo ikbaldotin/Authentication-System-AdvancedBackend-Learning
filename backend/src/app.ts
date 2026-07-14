@@ -7,6 +7,7 @@ import { globalErrorHandler } from "./middleware/error.middleware.js";
 import { AppError } from "./utils/errors/AppError.js";
 import authRouter from "./modules/auth/auth.route.js";
 import { requestLogger } from "./middleware/request-logger.middleware.js";
+import adminRouter from "./modules/admin/admin.route.js";
 export const app = express();
 // app.set("trust proxy", 1);
 app.use(helmet());
@@ -23,6 +24,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/admin", adminRouter);
 app.use((req, res, next) => {
   next(new AppError(`Can not find ${req.originalUrl} on this server`, 404));
 });

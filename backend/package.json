@@ -11,6 +11,9 @@
     "db:migrate": "npx prisma migrate dev --name init",
     "db:generate": "npx prisma generate"
   },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "author": "ikbaldotin",
   "license": "ISC",
   "dependencies": {

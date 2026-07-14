@@ -72,6 +72,8 @@ model UserRole {
   assignedAt DateTime @default(now())
 
   @@id([userId, roleId])
+  @@index([userId])
+  @@index([roleId])
 }
 
 model RolePermission {
@@ -82,4 +84,6 @@ model RolePermission {
   assignedAt   DateTime   @default(now())
 
   @@id([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
 }
