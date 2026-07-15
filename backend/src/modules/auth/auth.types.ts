@@ -1,3 +1,4 @@
+import { Prisma } from "../../../generated/prisma/index.js";
 export type createUserType = {
   email: string;
   password: string;
@@ -30,3 +31,32 @@ export type updateSessionType = {
   hashedRefreshToken: string;
   newRefreshTokenExpiryAt: Date;
 };
+
+export type UserPermissionsType = Prisma.UserGetPayload<{
+  select: {
+    id: true;
+    email: true;
+
+    userRole: {
+      select: {
+        role: {
+          select: {
+            id: true;
+            name: true;
+
+            rolePermissions: {
+              select: {
+                permission: {
+                  select: {
+                    id: true;
+                    name: true;
+                  };
+                };
+              };
+            };
+          };
+        };
+      };
+    };
+  };
+}>;

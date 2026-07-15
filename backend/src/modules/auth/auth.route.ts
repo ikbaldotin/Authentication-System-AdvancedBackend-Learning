@@ -7,6 +7,7 @@ import {
   refreshTokenController,
   logoutController,
   logoutUserFromAllSession,
+  getUserPermissionsController,
 } from "./auth.controller.js";
 import { loginUserSchema, registerUserSchema } from "./auth.schema.js";
 import { authMiddleware } from "../../middleware/authentication.middleware.js";
@@ -18,7 +19,11 @@ router
 router.route("/login").post(validate(loginUserSchema), loginUserController);
 router.route("/me").get(authMiddleware, getUserController);
 router.route("/refresh-token").post(refreshTokenController);
+router
+  .route("/me/permissions")
+  .get(authMiddleware, getUserPermissionsController);
 router.route("/logout").post(authMiddleware, logoutController);
+
 router
   .route("/logout-all-device")
   .post(authMiddleware, logoutUserFromAllSession);

@@ -4,6 +4,7 @@ import {
   createUserType,
   findUserByIdType,
   updateSessionType,
+  UserPermissionsType,
 } from "./auth.types.js";
 
 export interface IAuthRepository {
@@ -21,4 +22,5 @@ export interface IAuthRepository {
   updateSession(sessionId: string, data: updateSessionType): Promise<Session>;
   deleteSession(sessionId: string): Promise<void>;
   deleteUserAllSession(userId: string): Promise<void>;
+  getUserPermissions(userId: string): Promise<UserPermissionsType | null>;
 }
