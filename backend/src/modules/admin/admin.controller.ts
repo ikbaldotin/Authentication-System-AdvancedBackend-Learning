@@ -61,3 +61,24 @@ export const updateRoleController = CatchAsync(
     });
   },
 );
+export const deleteRoleController = CatchAsync(
+  async (req: Request, res: Response) => {
+    const roleId = req.params.roleId as string;
+    await adminService.deleteRole(roleId);
+    sendResponse(res, 200, {
+      success: true,
+      message: "role deleted successfully",
+    });
+  },
+);
+
+export const assignedRoleToUserController = CatchAsync(
+  async (req: Request, res: Response) => {
+    const userId = req.params.userId as string;
+    await adminService.assignRoleToUser(userId, req.body);
+    sendResponse(res, 200, {
+      success: true,
+      message: "Role assigned role to user successfully",
+    });
+  },
+);

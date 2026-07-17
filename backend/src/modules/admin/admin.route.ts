@@ -3,17 +3,25 @@ import { authMiddleware } from "../../middleware/authentication.middleware.js";
 import { authorizePermissions } from "../../middleware/authorization.middleware.js";
 import { Permissions } from "../../constants/permissions.js";
 import {
+  assignedRoleToUserController,
   createRoleController,
+  deleteRoleController,
   getAllRolesController,
   getAllUserController,
   getRoleByIdController,
   updateRoleController,
 } from "./admin.controller.js";
-import { validate } from "../../middleware/validate.middleware.js";
+import {
+  validate,
+  validateParams,
+} from "../../middleware/validate.middleware.js";
 import {
   createRoleSchema,
   getRoleByIdSchema,
   updateRoleSchema,
+  deleteRoleSchema,
+  assignRoleSchema,
+  assignedRoleParamsSchema,
 } from "./admin.schema.js";
 const router = express.Router();
 router
@@ -54,4 +62,22 @@ router
     validate(updateRoleSchema),
     updateRoleController,
   );
+router
+  .route("/roles/:roleId")
+  .delete(
+    authMiddleware,
+    authorizePermissions(Permissions.MANAGE_ROLES),
+    validate(deleteRoleSchema, "params"),
+    deleteRoleController,
+  );
+router
+  .route("/user/:userId/role")
+  .post(
+    authMiddleware,
+    authorizePermissions(Permissions.MANAGE_ROLES),
+    validate(assignedRoleParamsSchema, "params"),
+    validateParams(assignRoleSchema, "body"),
+    assignedRoleToUserController,
+  );
+
 export default router;

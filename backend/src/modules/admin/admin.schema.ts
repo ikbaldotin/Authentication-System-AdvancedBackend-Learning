@@ -30,5 +30,18 @@ export const updateRoleSchema = z
   .refine((data) => data.name !== undefined || data.permissions !== undefined, {
     message: "at least one field must be provider",
   });
+export const deleteRoleSchema = z.object({
+  roleId: z.uuid(),
+});
+export const assignRoleSchema = z.object({
+  roleIds: z.array(z.uuid()).min(1),
+});
+
+export const assignedRoleParamsSchema = z.object({
+  userId: z.uuid(),
+});
+
 export type createRoleInputDTO = z.infer<typeof createRoleSchema>;
 export type updateRoleInputDTO = z.infer<typeof updateRoleSchema>;
+export type deleteRoleDTO = z.infer<typeof deleteRoleSchema>;
+export type assignRoleInputDTO = z.infer<typeof assignRoleSchema>;
