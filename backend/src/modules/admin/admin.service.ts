@@ -81,4 +81,21 @@ export class AdminService {
     }
     await this.adminRepo.assignRoleToUser(userId, data.roleIds);
   }
+  async revokeRoleFromUser(userId: string, roleId: string) {
+    await this.adminRepo.removerUserRole(userId, roleId);
+  }
+  async getAllUserRolesById(roleId: string) {
+    const users = await this.adminRepo.getAllUserRolesById(roleId);
+    return users;
+  }
+  async GetUserPermission(userId: string) {
+    const users = await this.adminRepo.getUserPermissionByUserId(userId);
+    const permissions = users.userRole.flatMap((userRoles) =>
+      userRoles.role.rolePermissions.map(
+        (rolePermission) => rolePermission.permission.name,
+      ),
+    );
+    const unqiuePermission = [...new Set(permissions)];
+    return unqiuePermission;
+  }
 }

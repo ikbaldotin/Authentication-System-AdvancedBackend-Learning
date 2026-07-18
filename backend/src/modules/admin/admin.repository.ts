@@ -4,7 +4,12 @@ import { AppError } from "../../utils/errors/AppError.js";
 
 import { IAdminRepository } from "./admin.interface.js";
 import { assignRoleInputDTO, updateRoleInputDTO } from "./admin.schema.js";
-import { allRoleType, GetRoleByIdType } from "./admin.type.js";
+import {
+  allRoleType,
+  GetAllUserByRoleId,
+  GetRoleByIdType,
+  GetUserPermission,
+} from "./admin.type.js";
 
 export class AdminRepository implements IAdminRepository {
   async getAllUsers(): Promise<User[]> {
@@ -279,5 +284,81 @@ export class AdminRepository implements IAdminRepository {
       });
       return true;
     });
+  }
+  async removerUserRole(userId: string, roleId: string): Promise<void> {
+    await prisma.$transaction(async (tx) => {
+      const assignment = await tx.userRole.findUnique({
+        where: {
+          userId_roleId: {
+            userId,
+            roleId,
+          },
+        },
+        include: {
+          role: true,
+        },
+      });
+      if (!assignment) {
+        throw new AppError("ROLE_ASSIGNMENT_NOT_FOUND", 404);
+      }
+      if (assignment.role.name === "ADMIN") {
+        const adminCount = await tx.userRole.count({
+          where: {
+            role: {
+              name: "ADMIN",
+            },
+          },
+        });
+        if (adminCount <= 1) {
+          throw new AppError("LAST_ADMIN_ROLE", 403);
+        }
+      }
+      await tx.userRole.delete({
+        where: {
+          userId_roleId: {
+            userId,
+            roleId,
+          },
+        },
+      });
+      return true;
+    });
+  }
+  async getAllUserRolesById(roleId: string): Promise<GetAllUserByRoleId[]> {
+    const user = await prisma.userRole.findMany({
+      where: {
+        roleId,
+      },
+      include: {
+        user: true,
+      },
+    });
+    return user;
+  }
+  async getUserPermissionByUserId(userId: string): Promise<GetUserPermission> {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      include: {
+        userRole: {
+          include: {
+            role: {
+              include: {
+                rolePermissions: {
+                  include: {
+                    permission: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!user) {
+      throw new AppError("User not found", 404);
+    }
+    return user;
   }
 }

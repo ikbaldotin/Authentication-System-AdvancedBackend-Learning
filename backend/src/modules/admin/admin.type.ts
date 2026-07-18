@@ -58,3 +58,33 @@ export type updateRoleInputType = {
   name?: string;
   permissions?: string[];
 };
+
+export type GetAllUserByRoleId = Prisma.UserRoleGetPayload<{
+  where: {
+    roleId: string;
+  };
+  include: {
+    user: true;
+  };
+}>;
+
+export type GetUserPermission = Prisma.UserGetPayload<{
+  where: {
+    id: true;
+  };
+  include: {
+    userRole: {
+      include: {
+        role: {
+          include: {
+            rolePermissions: {
+              include: {
+                permission: true;
+              };
+            };
+          };
+        };
+      };
+    };
+  };
+}>;

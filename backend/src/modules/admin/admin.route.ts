@@ -9,7 +9,10 @@ import {
   getAllRolesController,
   getAllUserController,
   getRoleByIdController,
+  revokeRoleFromUserController,
   updateRoleController,
+  getAllUserOfRolesController,
+  getUserPermissionsController,
 } from "./admin.controller.js";
 import {
   validate,
@@ -22,6 +25,9 @@ import {
   deleteRoleSchema,
   assignRoleSchema,
   assignedRoleParamsSchema,
+  revokeUserRoleParamsSchema,
+  getAllUserOfRoleSchema,
+  getUserPermissionSchema,
 } from "./admin.schema.js";
 const router = express.Router();
 router
@@ -79,5 +85,27 @@ router
     validateParams(assignRoleSchema, "body"),
     assignedRoleToUserController,
   );
+router.route("/users/:userId/roles/:roleId").delete(
+  authMiddleware,
+  authorizePermissions(Permissions.MANAGE_ROLES),
+  validate(revokeUserRoleParamsSchema, "params"),
 
+  revokeRoleFromUserController,
+);
+router
+  .route("/user/roles/:roleId")
+  .get(
+    authMiddleware,
+    authorizePermissions(Permissions.MANAGE_ROLES),
+    validate(getAllUserOfRoleSchema, "params"),
+    getAllUserOfRolesController,
+  );
+router
+  .route("/users/:userId/permissions")
+  .get(
+    authMiddleware,
+    authorizePermissions(Permissions.MANAGE_USERS),
+    validate(getUserPermissionSchema, "params"),
+    getUserPermissionsController,
+  );
 export default router;
