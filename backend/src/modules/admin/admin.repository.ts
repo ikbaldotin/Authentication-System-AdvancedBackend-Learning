@@ -1,6 +1,11 @@
 import { Role, User } from "../../../generated/prisma/index.js";
 import { prisma } from "../../lib/prisma.js";
 import { AppError } from "../../utils/errors/AppError.js";
+import {
+  ensureIsRoleAssignable,
+  ensureIsRoleDeleteable,
+  ensureIsRoleEditable,
+} from "./admin.helper.js";
 
 import { IAdminRepository } from "./admin.interface.js";
 import { assignRoleInputDTO, updateRoleInputDTO } from "./admin.schema.js";
@@ -72,6 +77,7 @@ export class AdminRepository implements IAdminRepository {
       select: {
         id: true,
         name: true,
+        isSystem: true,
         createdAt: true,
         rolePermissions: {
           select: {
@@ -106,6 +112,7 @@ export class AdminRepository implements IAdminRepository {
         id: {
           in: roleIds,
         },
+        isDeleted: false,
       },
     });
     return roles;
@@ -151,6 +158,7 @@ export class AdminRepository implements IAdminRepository {
         where: {
           id: roleId,
         },
+
         include: {
           rolePermissions: true,
         },
@@ -158,6 +166,7 @@ export class AdminRepository implements IAdminRepository {
       if (!exitingRole) {
         throw new AppError("ROLE_NOT_FOUND", 404);
       }
+      ensureIsRoleEditable(exitingRole);
       if (data.name) {
         const duplicateRole = await tx.role.findFirst({
           where: {
@@ -223,6 +232,7 @@ export class AdminRepository implements IAdminRepository {
       if (!exitingRole) {
         throw new AppError("ROLE_NOT_FOUND", 404);
       }
+
       if (exitingRole.userRoles.length > 0) {
         throw new AppError("ROLE_ASSIGNED_TO_USER", 409);
       }
@@ -245,9 +255,11 @@ export class AdminRepository implements IAdminRepository {
           id: userId,
         },
       });
+
       if (!exitingUser) {
         throw new AppError("user not found", 404);
       }
+
       const roles = await tx.role.findMany({
         where: {
           id: {
@@ -259,6 +271,9 @@ export class AdminRepository implements IAdminRepository {
       if (roles.length !== roleIds.length) {
         throw new AppError("INVALID_ROLES", 400);
       }
+      roles.forEach((role) => {
+        ensureIsRoleAssignable(role);
+      });
       const exitingAssignment = await tx.userRole.findMany({
         where: {
           userId,

@@ -25,7 +25,9 @@ async function main() {
     where: {
       name: "ADMIN",
     },
-    update: {},
+    update: {
+      isSystem: true,
+    },
     create: {
       name: "ADMIN",
     },

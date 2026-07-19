@@ -1,6 +1,11 @@
 import { IMMUTABLE_ROLES } from "../../constants/system-roles.js";
 import { AppError } from "../../utils/errors/AppError.js";
 import { toResponseDTO } from "./admin.dto.js";
+import {
+  ensureIsRoleAssignable,
+  ensureIsRoleDeleteable,
+  ensureIsRoleEditable,
+} from "./admin.helper.js";
 import { IAdminRepository } from "./admin.interface.js";
 import {
   assignRoleInputDTO,
@@ -55,6 +60,12 @@ export class AdminService {
     }
   }
   async updateRole(roleId: string, data: updateRoleInputDTO) {
+    const role = await this.adminRepo.getRoleById(roleId);
+    if (!role) {
+      throw new AppError("role not found", 404);
+    }
+
+    ensureIsRoleEditable(role);
     const updateRole = await this.adminRepo.updateRole(roleId, data);
     return updateRole;
   }
@@ -63,22 +74,29 @@ export class AdminService {
     if (!role) {
       throw new AppError("Role not found", 404);
     }
-    if (IMMUTABLE_ROLES.includes(role.name as any)) {
-      throw new AppError("system role can not be deleted", 403);
-    }
+    ensureIsRoleDeleteable(role);
+    // if (IMMUTABLE_ROLES.includes(role.name as any)) {
+    //   throw new AppError("system role can not be deleted", 403);
+    // }
     await this.adminRepo.deleteRole(roleId);
   }
   async assignRoleToUser(userId: string, data: assignRoleInputDTO) {
     const roles = await this.adminRepo.getRolesById(data.roleIds);
-    const immutableRoles = roles?.filter((role) =>
-      IMMUTABLE_ROLES.includes(role.name as any),
-    );
-    if (!immutableRoles) {
-      throw new AppError("roles not found", 404);
+    if (!roles) {
+      throw new AppError("role not found", 404);
     }
-    if (immutableRoles.length > 0) {
-      throw new AppError("immutable role can not be assigned", 403);
+    for (const role of roles) {
+      ensureIsRoleAssignable(role);
     }
+    // const immutableRoles = roles?.filter((role) =>
+    //   IMMUTABLE_ROLES.includes(role.name as any),
+    // );
+    // if (!immutableRoles) {
+    //   throw new AppError("roles not found", 404);
+    // }
+    // if (immutableRoles.length > 0) {
+    //   throw new AppError("immutable role can not be assigned", 403);
+    // }
     await this.adminRepo.assignRoleToUser(userId, data.roleIds);
   }
   async revokeRoleFromUser(userId: string, roleId: string) {
