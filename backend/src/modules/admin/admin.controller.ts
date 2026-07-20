@@ -87,7 +87,7 @@ export const revokeRoleFromUserController = CatchAsync(
   async (req: Request, res: Response) => {
     const userId = req.params.userId as string;
     const roleId = req.params.roleId as string;
-    await adminService.revokeRoleFromUser(userId, roleId);
+    await adminService.removeRoleFromUser(userId, roleId);
     sendResponse(res, 200, {
       success: true,
       message: "Role removed successfuly",
@@ -114,6 +114,41 @@ export const getUserPermissionsController = CatchAsync(
     sendResponse(res, 200, {
       success: true,
       message: "User permission fetched successfully",
+      data: result,
+    });
+  },
+);
+
+export const getAllPermissionsController = CatchAsync(
+  async (req: Request, res: Response) => {
+    const result = await adminService.getAllPermissions();
+    sendResponse(res, 200, {
+      success: true,
+      message: "Permissions fetched successfully",
+      data: result,
+    });
+  },
+);
+
+export const getPermissionDetailController = CatchAsync(
+  async (req: Request, res: Response) => {
+    const permissionId = req.params.permissionId as string;
+    const result = await adminService.getPermissionDetail(permissionId);
+    sendResponse(res, 200, {
+      success: true,
+      message: "Permission details fetched successfully",
+      data: result,
+    });
+  },
+);
+
+export const getUsersByPermissionController = CatchAsync(
+  async (req: Request, res: Response) => {
+    const permissionId = req.params.permissionId as string;
+    const result = await adminService.getUsersByPermissions(permissionId);
+    sendResponse(res, 200, {
+      success: true,
+      message: "User with the permissions fetched",
       data: result,
     });
   },

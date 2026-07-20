@@ -13,6 +13,9 @@ import {
   updateRoleController,
   getAllUserOfRolesController,
   getUserPermissionsController,
+  getAllPermissionsController,
+  getPermissionDetailController,
+  getUsersByPermissionController,
 } from "./admin.controller.js";
 import {
   validate,
@@ -28,6 +31,8 @@ import {
   revokeUserRoleParamsSchema,
   getAllUserOfRoleSchema,
   getUserPermissionSchema,
+  getPermissionDetailSchema,
+  getUsersByPermissionSchema,
 } from "./admin.schema.js";
 const router = express.Router();
 router
@@ -107,5 +112,28 @@ router
     authorizePermissions(Permissions.MANAGE_USERS),
     validate(getUserPermissionSchema, "params"),
     getUserPermissionsController,
+  );
+router
+  .route("/permissions")
+  .get(
+    authMiddleware,
+    authorizePermissions(Permissions.MANAGE_ROLES),
+    getAllPermissionsController,
+  );
+router
+  .route("/permissions/:permissionId")
+  .get(
+    authMiddleware,
+    authorizePermissions(Permissions.MANAGE_ROLES),
+    validate(getPermissionDetailSchema, "params"),
+    getPermissionDetailController,
+  );
+router
+  .route("/permissions/:permissionId/users")
+  .get(
+    authMiddleware,
+    authorizePermissions(Permissions.MANAGE_ROLES),
+    validate(getUsersByPermissionSchema, "params"),
+    getUsersByPermissionController,
   );
 export default router;

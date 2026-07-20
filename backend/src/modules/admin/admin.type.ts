@@ -89,3 +89,56 @@ export type GetUserPermission = Prisma.UserGetPayload<{
     };
   };
 }>;
+
+export type getAllPermissionsType = Prisma.PermissionGetPayload<{
+  select: {
+    id: true;
+    name: true;
+  };
+}>;
+
+export type getPermissionDetailType = Prisma.PermissionGetPayload<{
+  where: {
+    id: true;
+  };
+  include: {
+    rolePermissions: {
+      include: {
+        role: {
+          select: {
+            id: true;
+            name: true;
+          };
+        };
+      };
+    };
+  };
+}>;
+
+export type GetUserByPermissionsType = Prisma.PermissionGetPayload<{
+  where: {
+    id: true;
+  };
+  select: {
+    id: true;
+    name: true;
+    rolePermissions: {
+      select: {
+        role: {
+          select: {
+            userRoles: {
+              select: {
+                user: {
+                  select: {
+                    id: true;
+                    email: true;
+                  };
+                };
+              };
+            };
+          };
+        };
+      };
+    };
+  };
+}>;

@@ -16,6 +16,8 @@ const envSchema = z.object({
   REFRESH_TOKEN_EXPIRES_IN: z.string(),
   ADMIN_EMAIL: z.email(),
   ADMIN_PASSWORD: z.string(),
+  REDIS_URL: z.string(),
+  REDIS_PORT: z.coerce.string(),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
