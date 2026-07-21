@@ -15,9 +15,45 @@ import { sanitizeUserResponse } from "./auth.response.js";
 
 import { env } from "../../config/env.config.js";
 import { UserType } from "./auth.types.js";
+import { useId } from "react";
 
 export class AuthService {
   constructor(private authRepo: IAuthRepository) {}
+  private async createAuthenticatedSession(
+    userId: string,
+    userAgent: string,
+    ipAddress: string,
+  ) {
+    const sessionId = generateSessionId();
+    const accessToken = signAccessToken({
+      sub: userId,
+      sessionId,
+    });
+    const refreshToken = signRefreshToken({
+      sub: userId,
+      sessionId,
+    });
+    const hashedRefreshToken = hashRefreshToken(refreshToken);
+    const refreshTokenExpriesIn = ms(
+      env.REFRESH_TOKEN_EXPIRES_IN as StringValue,
+    );
+    if (typeof refreshTokenExpriesIn !== "number") {
+      throw new AppError("Invalid refresh token", 404);
+    }
+    const expiresAt = new Date(Date.now() + refreshTokenExpriesIn);
+    await this.authRepo.createSession({
+      id: sessionId,
+      userId: userId,
+      refreshTokenHash: hashedRefreshToken,
+      userAgent: userAgent,
+      ipAddress: ipAddress,
+      expiresAt,
+    });
+    return {
+      accessToken,
+      refreshToken,
+    };
+  }
   async registerUserService(data: {
     email: string;
     password: string;
@@ -34,15 +70,15 @@ export class AuthService {
       email: email,
       password: hashedPassword,
     });
-
-    const result = await this.loginUser({
-      email,
-      password,
-      userAgent,
-      ipAddress,
-    });
-    return result;
-    // return sanitizeUserResponse(createUser);
+    const authSession = await this.createAuthenticatedSession(
+      createUser.id,
+      data.userAgent,
+      data.ipAddress,
+    );
+    return {
+      user: sanitizeUserResponse(createUser),
+      ...authSession,
+    };
   }
   async loginUser(data: {
     email: string;
@@ -61,29 +97,15 @@ export class AuthService {
     if (!isPasswordCorrect) {
       throw new AppError("Invalid credentials", 401);
     }
-    const sessionId = generateSessionId();
-    const accessToken = signAccessToken({ sub: existingUser.id, sessionId });
-    const refreshToken = signRefreshToken({ sub: existingUser.id, sessionId });
-    const hashedRefreshToken = hashRefreshToken(refreshToken);
-    const refreshTokenExpriesIn = ms(
-      env.REFRESH_TOKEN_EXPIRES_IN as StringValue,
+
+    const authSession = await this.createAuthenticatedSession(
+      existingUser.id,
+      data.userAgent,
+      data.ipAddress,
     );
-    if (typeof refreshTokenExpriesIn !== "number") {
-      throw new AppError("Invalid refresh token", 404);
-    }
-    const expiresAt = new Date(Date.now() + refreshTokenExpriesIn);
-    await this.authRepo.createSession({
-      id: sessionId,
-      userId: existingUser.id,
-      refreshTokenHash: hashedRefreshToken,
-      userAgent: data.userAgent,
-      ipAddress: data.ipAddress,
-      expiresAt,
-    });
     return {
       user: sanitizeUserResponse(existingUser),
-      accessToken,
-      refreshToken,
+      ...authSession,
     };
   }
   async getLoggedInUser(data: UserType) {

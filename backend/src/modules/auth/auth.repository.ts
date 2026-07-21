@@ -1,4 +1,8 @@
-import { User } from "../../../generated/prisma/index.js";
+import {
+  authAccount,
+  AuthProvider,
+  User,
+} from "../../../generated/prisma/index.js";
 import { Session } from "../../../generated/prisma/index.js";
 import { prisma } from "../../lib/prisma.js";
 import { IAuthRepository } from "./auth.interface.js";
@@ -148,5 +152,27 @@ export class AuthRepository implements IAuthRepository {
     });
 
     return user;
+  }
+  async findAuthAccount(
+    provider: AuthProvider,
+    providerAccountId: string,
+  ): Promise<authAccount | null> {
+    const authAccount = await prisma.authAccount.findUnique({
+      where: {
+        provider_providerAccountId: {
+          provider,
+          providerAccountId,
+        },
+      },
+      include: {
+        user: true,
+      },
+    });
+    return authAccount;
+  }
+  async createAuthAccount(data: authAccount): Promise<authAccount> {
+    return await prisma.authAccount.create({
+      data,
+    });
   }
 }

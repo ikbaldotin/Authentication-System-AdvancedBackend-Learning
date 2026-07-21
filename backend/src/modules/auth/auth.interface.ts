@@ -1,4 +1,9 @@
-import { Session, User } from "../../../generated/prisma/index.js";
+import {
+  authAccount,
+  AuthProvider,
+  Session,
+  User,
+} from "../../../generated/prisma/index.js";
 import {
   createSessionType,
   createUserType,
@@ -23,4 +28,9 @@ export interface IAuthRepository {
   deleteSession(sessionId: string): Promise<void>;
   deleteUserAllSession(userId: string): Promise<void>;
   getUserPermissions(userId: string): Promise<UserPermissionsType | null>;
+  findAuthAccount(
+    provider: AuthProvider,
+    providerAccountId: string,
+  ): Promise<authAccount | null>;
+  createAuthAccount(data: authAccount): Promise<authAccount>;
 }

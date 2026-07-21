@@ -18,6 +18,9 @@ const envSchema = z.object({
   ADMIN_PASSWORD: z.string(),
   REDIS_URL: z.string(),
   REDIS_PORT: z.coerce.string(),
+  GOOGLE_CLIENT_ID: z.string(),
+  GOOGLE_CLIENT_SECRET: z.string(),
+  GOOGLE_REDIRECT_URI: z.string(),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
