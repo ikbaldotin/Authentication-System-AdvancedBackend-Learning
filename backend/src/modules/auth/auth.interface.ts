@@ -1,10 +1,10 @@
-import {
+import type {
   authAccount,
   AuthProvider,
   Session,
   User,
 } from "../../../generated/prisma/index.js";
-import {
+import type {
   createSessionType,
   createUserType,
   findUserByIdType,

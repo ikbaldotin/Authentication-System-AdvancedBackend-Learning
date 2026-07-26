@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { ZodObject } from "zod";
 import { AppError } from "../utils/errors/AppError.js";
 type validateTarget = "body" | "params" | "query";

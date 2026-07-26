@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import { CatchAsync } from "../../utils/helpers/CatchAsync.js";
 import authService from "./auth.container.js";
 import { sendResponse } from "../../utils/common/response/AppResponse.js";

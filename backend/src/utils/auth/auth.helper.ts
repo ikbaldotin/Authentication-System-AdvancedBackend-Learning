@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { Response } from "express";
+import type { Response } from "express";
 import { env } from "../../config/env.config.js";
 import ms from "ms";
 export const hashRefreshToken = (token: string) => {

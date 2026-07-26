@@ -15,7 +15,6 @@ import { sanitizeUserResponse } from "./auth.response.js";
 
 import { env } from "../../config/env.config.js";
 import { UserType } from "./auth.types.js";
-import { useId } from "react";
 
 export class AuthService {
   constructor(private authRepo: IAuthRepository) {}
