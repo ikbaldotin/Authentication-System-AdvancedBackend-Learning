@@ -7,9 +7,11 @@ import type { Session } from "../../../generated/prisma/index.js";
 import { prisma } from "../../lib/prisma.js";
 import type { IAuthRepository } from "./auth.interface.js";
 import type {
+  AuthAccountWithUser,
   createSessionType,
   createUserType,
   findUserByIdType,
+  linkAuthAccountType,
   updateSessionType,
   UserPermissionsType,
 } from "./auth.types.js";
@@ -51,6 +53,7 @@ export class AuthRepository implements IAuthRepository {
     });
     return user;
   }
+
   async findSessionById(sessionId: string): Promise<Session | null> {
     const session = await prisma.session.findUnique({
       where: {
@@ -156,7 +159,7 @@ export class AuthRepository implements IAuthRepository {
   async findAuthAccount(
     provider: AuthProvider,
     providerAccountId: string,
-  ): Promise<authAccount | null> {
+  ): Promise<AuthAccountWithUser | null> {
     const authAccount = await prisma.authAccount.findUnique({
       where: {
         provider_providerAccountId: {
@@ -174,5 +177,15 @@ export class AuthRepository implements IAuthRepository {
     return await prisma.authAccount.create({
       data,
     });
+  }
+  async linkAuthAccount(data: linkAuthAccountType): Promise<authAccount> {
+    const authAccount = await prisma.authAccount.create({
+      data: {
+        userId: data.userId,
+        providerAccountId: data.providerAccountId,
+        provider: data.provider,
+      },
+    });
+    return authAccount;
   }
 }

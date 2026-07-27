@@ -18,14 +18,14 @@ enum AuthProvider {
 }
 
 model User {
-  id              String       @id @default(uuid())
-  email           String       @unique
+  id              String  @id @default(uuid())
+  email           String  @unique
   password        String
-  isEmailVerified Boolean      @default(false)
-  provider        AuthProvider @default(EMAIL)
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-  sessions        Session[]
+  isEmailVerified Boolean @default(false)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  sessions  Session[]
 
   userRole     UserRole[]
   authAccounts authAccount[]

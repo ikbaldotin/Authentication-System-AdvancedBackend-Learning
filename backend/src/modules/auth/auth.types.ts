@@ -1,7 +1,7 @@
-import { Prisma } from "../../../generated/prisma/index.js";
+import { AuthProvider, Prisma } from "../../../generated/prisma/index.js";
 export type createUserType = {
   email: string;
-  password: string;
+  password: string | null;
 };
 
 export type JWTPayload = {
@@ -58,5 +58,22 @@ export type UserPermissionsType = Prisma.UserGetPayload<{
         };
       };
     };
+  };
+}>;
+
+export type linkAuthAccountType = {
+  userId: string;
+  providerAccountId: string;
+  provider: AuthProvider;
+};
+export type AuthAccountWithUser = Prisma.authAccountGetPayload<{
+  where: {
+    provider_providerAccountId: {
+      provider: true;
+      providerAccountId: true;
+    };
+  };
+  include: {
+    user: true;
   };
 }>;
