@@ -21,9 +21,9 @@ export const setCookie = (
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: "lax",
     maxAge: refreshTokenMaxAge,
-    path: "/api/v1/refresh-token",
+    // path: "/api/v1/refresh-token",
   });
 };
 
@@ -31,8 +31,8 @@ export const clearCookies = (res: Response) => {
   res.clearCookie(`refreshToken`, {
     httpOnly: true,
     secure: env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: "lax",
 
-    path: "/api/v1/refresh-token",
+    // path: "/api/v1/refresh-token",
   });
 };

@@ -4,16 +4,7 @@ import { logger } from "./config/logger.js";
 import { prisma } from "./lib/prisma.js";
 
 const port = env.PORT;
-// const startServer = () => {
-//   try {
-//     app.listen(port, () => {
-//       logger.info(`server is running on  port ${port}`);
-//     });
-//   } catch (error) {
-//     logger.error(error);
-//     process.exit(1);
-//   }
-// };
+
 const server = app.listen(port, () => {
   logger.info(`server is running on  port ${port}`);
 });

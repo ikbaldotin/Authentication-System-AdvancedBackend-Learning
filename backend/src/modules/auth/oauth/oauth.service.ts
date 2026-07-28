@@ -4,11 +4,15 @@ import { googleClient } from "../../../lib/google.js";
 import { AppError } from "../../../utils/errors/AppError.js";
 import { IAuthRepository } from "../auth.interface.js";
 import { sanitizeUserResponse } from "../auth.response.js";
+import { AuthService } from "../auth.service.js";
 import { GoogleProfileUser } from "./oauth.dto.js";
 import { generatedAuthState } from "./oauth.helper.js";
 
 export class GooogleAuthService {
-  constructor(private authRepo: IAuthRepository) {}
+  constructor(
+    private authRepo: IAuthRepository,
+    private authService: AuthService,
+  ) {}
   async generateGoogleAuthUrl() {
     const state = generatedAuthState();
     console.log("Redirect URI:", env.GOOGLE_REDIRECT_URI);
@@ -89,9 +93,22 @@ export class GooogleAuthService {
     });
     return sanitizeUserResponse(user);
   }
-  async handleGoogleCallback(code: string) {
+  async handleGoogleCallback(
+    code: string,
+    userAgent: string,
+    ipAddress: string,
+  ) {
     const googleUser = await this.exchangeCodeForGoogleUser(code);
     const user = await this.findOrCreateGoogleUser(googleUser);
-    return user;
+    const authSession = await this.authService.createAuthenticatedSession(
+      user.id,
+      userAgent,
+      ipAddress,
+    );
+    return {
+      user,
+      accessToken: authSession.accessToken,
+      refreshToken: authSession.refreshToken,
+    };
   }
 }

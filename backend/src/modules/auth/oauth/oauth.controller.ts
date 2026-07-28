@@ -9,6 +9,8 @@ import {
   OAUTH_STATE_COOKIE,
   setOauthStateCookie,
 } from "./oauth.helper.js";
+import { setCookie } from "../../../utils/auth/auth.helper.js";
+import { env } from "../../../config/env.config.js";
 export const redirectToGoogleController = CatchAsync(
   async (req: Request, res: Response) => {
     const result = await googleAuthService.generateGoogleAuthUrl();
@@ -36,12 +38,19 @@ export const googleCallBackController = CatchAsync(
     const cookieState = req.cookies[OAUTH_STATE_COOKIE];
     googleAuthService.validateOAuth(cookieState, state);
     clearOauthStateCookie(res);
-    const result = await googleAuthService.handleGoogleCallback(code);
-
-    sendResponse(res, 200, {
-      success: true,
-      message: "Google callback received successfully",
-      data: result,
-    });
+    const userAgent = req.headers["user-agent"] ?? "unknown";
+    const ipAddress = req.ip ?? "unknown";
+    const result = await googleAuthService.handleGoogleCallback(
+      code,
+      userAgent,
+      ipAddress,
+    );
+    setCookie(res, result.refreshToken);
+    res.redirect(`${env.FRONTEND_URL}/dashboard`);
+    // sendResponse(res, 200, {
+    //   success: true,
+    //   message: "Google callback received successfully",
+    //   data: result,
+    // });
   },
 );
