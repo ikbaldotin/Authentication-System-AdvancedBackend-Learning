@@ -11,12 +11,14 @@ export const refreshRateLimit = rateLimit({
     sendCommand: (...args: string[]) => {
       return redis.call(args[0], ...args.slice(1)) as Promise<any>;
     },
+    prefix:"refreshToken"
   }),
   handler: (_, res) => {
     res.status(429).json({
       success: false,
       message: "refresh rate limit,Too many request,pleaes try again later",
-    });
+    }),
+    
   },
   keyGenerator: (req) => {
     return ipKeyGenerator(req.ip as string);
