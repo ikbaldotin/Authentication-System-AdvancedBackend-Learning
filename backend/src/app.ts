@@ -9,8 +9,10 @@ import authRouter from "./modules/auth/auth.route.js";
 import oauthRouter from "./modules/auth/oauth/oauth.route.js";
 import { requestLogger } from "./middleware/request-logger.middleware.js";
 import adminRouter from "./modules/admin/admin.route.js";
+import { globalRateLimiter } from "./middleware/rate-limit/rate-limit.middleware.js";
 export const app = express();
 // app.set("trust proxy", 1);
+
 app.use(helmet());
 app.use(requestLogger);
 app.use(
@@ -23,6 +25,7 @@ app.use(
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(globalRateLimiter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/admin", adminRouter);
 app.use("/api/v1/oauth", oauthRouter);
