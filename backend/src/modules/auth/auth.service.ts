@@ -12,7 +12,7 @@ import { comparePassword, hashPassword } from "../../utils/auth/password.js";
 import { AppError } from "../../utils/errors/AppError.js";
 import { IAuthRepository } from "./auth.interface.js";
 import { sanitizeUserResponse } from "./auth.response.js";
-
+import { loginLockoutService } from "./security/login-logout.service.js";
 import { env } from "../../config/env.config.js";
 import { UserType } from "./auth.types.js";
 
@@ -87,6 +87,7 @@ export class AuthService {
   }) {
     const existingUser = await this.authRepo.findUserByEmail(data.email);
     if (!existingUser || !existingUser.password) {
+      await loginLockoutService.recordFailure(data.email, data.ipAddress);
       throw new AppError("Invalid credentials", 401);
     }
     const isPasswordCorrect = await comparePassword(
@@ -94,9 +95,14 @@ export class AuthService {
       existingUser.password,
     );
     if (!isPasswordCorrect) {
+      const lockResponse = await loginLockoutService.recordFailure(
+        data.email,
+        data.ipAddress,
+      );
+
       throw new AppError("Invalid credentials", 401);
     }
-
+    await loginLockoutService.clearFailures(data.email, data.ipAddress);
     const authSession = await this.createAuthenticatedSession(
       existingUser.id,
       data.userAgent,

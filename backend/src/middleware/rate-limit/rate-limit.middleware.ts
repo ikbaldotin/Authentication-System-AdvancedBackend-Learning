@@ -3,7 +3,7 @@ import RedisStore from "rate-limit-redis";
 import redis from "../../lib/redis";
 
 export const globalRateLimiter = rateLimit({
-  windowMs: 10 * 1000,
+  windowMs: 5 * 10 * 1000,
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,

@@ -3,8 +3,8 @@ import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import RedisStore from "rate-limit-redis";
 import redis from "../../lib/redis.js";
 export const loginRateLimiter = rateLimit({
-  windowMs: 10 * 1000, // for testing
-  max: 2, // for testing
+  windowMs: 15 * 60 * 1000, // for testing
+  max: 30, // for testing
   standardHeaders: true,
   legacyHeaders: false,
   store: new RedisStore({

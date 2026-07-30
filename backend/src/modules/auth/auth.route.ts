@@ -23,9 +23,7 @@ router
     validate(registerUserSchema),
     registerUserController,
   );
-router
-  .route("/login")
-  .post(loginRateLimiter, validate(loginUserSchema), loginUserController);
+router.route("/login").post(validate(loginUserSchema), loginUserController);
 router.route("/me").get(authMiddleware, getUserController);
 router.route("/refresh-token").post(refreshRateLimit, refreshTokenController);
 router

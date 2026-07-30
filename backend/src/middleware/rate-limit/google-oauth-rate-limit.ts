@@ -3,8 +3,8 @@ import RedisStore from "rate-limit-redis";
 import redis from "../../lib/redis";
 
 export const oAuthStartRateLimit = rateLimit({
-  windowMs: 5 * 60 * 1000, // for testing
-  max: 2, // for testing
+  windowMs: 15 * 60 * 1000, // for testing
+  max: 30, // for testing
   standardHeaders: true,
   legacyHeaders: false,
   store: new RedisStore({
