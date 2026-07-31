@@ -15,6 +15,7 @@ import { sanitizeUserResponse } from "./auth.response.js";
 import { loginLockoutService } from "./security/login-logout.service.js";
 import { env } from "../../config/env.config.js";
 import { UserType } from "./auth.types.js";
+import { refreshProtectionService } from "./security/refresh-protection.service.js";
 
 export class AuthService {
   constructor(private authRepo: IAuthRepository) {}
@@ -121,53 +122,64 @@ export class AuthService {
     }
     return user;
   }
-  async refreshSession(refreshToken: string) {
+  async refreshSession(refreshToken: string, userAgent?: string) {
     const payload = verifyRefreshToken(refreshToken);
+    await refreshProtectionService.acquireRefreshLock(payload.sessionId);
+    try {
+      const session = await this.authRepo.findSessionById(payload.sessionId);
 
-    const session = await this.authRepo.findSessionById(payload.sessionId);
-    console.log("session----", session);
-    if (!session) {
-      throw new AppError("session not found", 401);
+      if (!session) {
+        throw new AppError("session not found", 401);
+      }
+      refreshProtectionService.validateSession(session);
+      if (userAgent && session.userAgent && userAgent !== session.userAgent) {
+        refreshProtectionService.LogSuspiciousRefresh({
+          userId: session.userId,
+          sessionId: session.id,
+          previousUserAgent: session.userAgent,
+          currentUserAgent: userAgent,
+        });
+      }
+      const incomingRefreshTokenHash = hashRefreshToken(refreshToken);
+      const incomingRefreshTokenValid =
+        incomingRefreshTokenHash === session.refreshTokenHash;
+      if (!incomingRefreshTokenValid) {
+        refreshProtectionService.LogRefreshRuse({
+          userId: session.userId,
+          sessionId: session.id,
+        });
+        await this.authRepo.revokedUserAllSession(session.userId);
+        throw new AppError("refresh token reuse detected", 401);
+      }
+      const newAccessToken = signAccessToken({
+        sub: session.userId,
+        sessionId: session.id,
+      });
+      const newRefreshToken = signRefreshToken({
+        sub: session.userId,
+        sessionId: session.id,
+      });
+      const hashedRefreshToken = hashRefreshToken(newAccessToken);
+      const newRefreshTokenExpiryIn = ms(
+        env.REFRESH_TOKEN_EXPIRES_IN as StringValue,
+      );
+      if (typeof newRefreshTokenExpiryIn !== "number") {
+        throw new Error("Invalid refresh token expires");
+      }
+      const newRefreshTokenExpiryAt = new Date(
+        Date.now() + newRefreshTokenExpiryIn,
+      );
+      const updateSession = await this.authRepo.updateSession(session.id, {
+        hashedRefreshToken,
+        newRefreshTokenExpiryAt,
+      });
+      return {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      };
+    } finally {
+      await refreshProtectionService.releaseRefreshLock(payload.sessionId);
     }
-    if (session.isRevoked) {
-      throw new AppError("session has revoked", 401);
-    }
-    if (session.expiresAt < new Date()) {
-      throw new AppError("Session has expires", 401);
-    }
-    const incomingRefreshTokenHash = hashRefreshToken(refreshToken);
-    const incomingRefreshTokenValid =
-      incomingRefreshTokenHash === session.refreshTokenHash;
-    if (!incomingRefreshTokenValid) {
-      await this.authRepo.revokedUserAllSession(session.userId);
-      throw new AppError("refresh token reuse detected", 401);
-    }
-    const newAccessToken = signAccessToken({
-      sub: session.userId,
-      sessionId: session.id,
-    });
-    const newRefreshToken = signRefreshToken({
-      sub: session.userId,
-      sessionId: session.id,
-    });
-    const hashedRefreshToken = hashRefreshToken(newAccessToken);
-    const newRefreshTokenExpiryIn = ms(
-      env.REFRESH_TOKEN_EXPIRES_IN as StringValue,
-    );
-    if (typeof newRefreshTokenExpiryIn !== "number") {
-      throw new Error("Invalid refresh token expires");
-    }
-    const newRefreshTokenExpiryAt = new Date(
-      Date.now() + newRefreshTokenExpiryIn,
-    );
-    const updateSession = await this.authRepo.updateSession(session.id, {
-      hashedRefreshToken,
-      newRefreshTokenExpiryAt,
-    });
-    return {
-      accessToken: newAccessToken,
-      refreshToken: newRefreshToken,
-    };
   }
   async logout(userId: string, sessionId: string) {
     const session = await this.authRepo.findSessionByUserAndSessionId(

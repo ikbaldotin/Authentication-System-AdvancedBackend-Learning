@@ -69,7 +69,8 @@ export const refreshTokenController = CatchAsync(
     if (!refreshToken) {
       throw new AppError("refresh token is missing", 401);
     }
-    const result = await authService.refreshSession(refreshToken);
+    const userAgent = req.headers["user-agent"] ?? "unknown";
+    const result = await authService.refreshSession(refreshToken, userAgent);
     setCookie(res, result.accessToken);
     sendResponse(res, 201, {
       success: true,
