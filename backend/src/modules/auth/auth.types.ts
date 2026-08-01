@@ -77,3 +77,12 @@ export type AuthAccountWithUser = Prisma.authAccountGetPayload<{
     user: true;
   };
 }>;
+
+export interface TurnstileVerificationResponse {
+  success: boolean;
+  challenge_ts: string;
+  hostname: string;
+  error_code?: string[];
+  action?: string;
+  cdata?: string;
+}

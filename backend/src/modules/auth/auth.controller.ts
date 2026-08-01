@@ -7,7 +7,7 @@ import { AppError } from "../../utils/errors/AppError.js";
 
 export const registerUserController = CatchAsync(
   async (req: Request, res: Response) => {
-    const { email, password } = req.body;
+    const { email, password, captchaToken } = req.body;
     const userAgent = req.headers["user-agent"]! || "known";
     const ipAddress = req.ip || "known";
     const result = await authService.registerUserService({
@@ -15,6 +15,7 @@ export const registerUserController = CatchAsync(
       password,
       userAgent,
       ipAddress,
+      captchaToken,
     });
     setCookie(res, result.refreshToken);
     sendResponse(res, 201, {

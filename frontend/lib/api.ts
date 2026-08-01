@@ -14,3 +14,29 @@ export const getOAuthGoogleUrl = async () => {
     console.log(error);
   }
 };
+interface registerUserInput {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  captchaToken: string;
+}
+export async function registerUser(data: registerUserInput) {
+  const response = await axios.post(
+    `${BACKEND_URL}/api/v1/auth/register`,
+    data,
+    { withCredentials: true },
+  );
+  return response.data;
+}
+interface loginUserInput {
+  email: string;
+  password: string;
+
+  captchaToken?: string;
+}
+export async function loginUser(data: loginUserInput) {
+  const response = await axios.post(`${BACKEND_URL}/api/v1/auth/login`, data, {
+    withCredentials: true,
+  });
+  return response.data;
+}

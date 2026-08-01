@@ -27,6 +27,7 @@ export default function DashboardPage() {
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },
+            withCredentials: true,
           },
         );
 
@@ -51,7 +52,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex w-full flex-col justify-center items-center min-h-screen">
-      <h1 className="text-2xl">Dashboard</h1>
+      <h1 className="text-2xl">Dashboard </h1>
       <p className="text-xl">{`Welcome To The Dashboard ${user.email}`}</p>
     </div>
   );

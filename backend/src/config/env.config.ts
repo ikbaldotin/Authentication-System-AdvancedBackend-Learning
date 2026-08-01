@@ -23,6 +23,7 @@ const envSchema = z.object({
   GOOGLE_REDIRECT_URI: z.string(),
   CLOUDFLARE_TURNSITLE_API_SECRET: z.string(),
   CLOUDFLARE_TURNSITLE_SITE_KEY: z.string(),
+  CLOUDFLARE_TURNSITLE_TOKEN_VERIFICATION_URL: z.url(),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

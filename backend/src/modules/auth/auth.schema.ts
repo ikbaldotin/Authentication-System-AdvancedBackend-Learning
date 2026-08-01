@@ -8,6 +8,7 @@ export const registerUserSchema = z
       .min(6, "Password must be at least 6 characters long")
       .max(72, "Password must be at most 72 characters long"),
     confirmPassword: z.string(),
+    captchaToken: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     path: ["confirmPassword"],

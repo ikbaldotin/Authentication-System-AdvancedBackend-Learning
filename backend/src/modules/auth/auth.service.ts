@@ -16,7 +16,7 @@ import { loginLockoutService } from "./security/login-logout.service.js";
 import { env } from "../../config/env.config.js";
 import { UserType } from "./auth.types.js";
 import { refreshProtectionService } from "./security/refresh-protection.service.js";
-
+import { captchaService } from "./security/capture.service.js";
 export class AuthService {
   constructor(private authRepo: IAuthRepository) {}
   async createAuthenticatedSession(
@@ -59,12 +59,17 @@ export class AuthService {
     password: string;
     userAgent: string;
     ipAddress: string;
+    captchaToken: string;
   }) {
     const { email, password, userAgent, ipAddress } = data;
     const existingUser = await this.authRepo.findUserByEmail(email);
     if (existingUser) {
       throw new AppError("user already exit", 404);
     }
+    await captchaService.verifyTurnstileToken(
+      data.captchaToken,
+      data.ipAddress,
+    );
     const hashedPassword = await hashPassword(data.password);
     const createUser = await this.authRepo.createUser({
       email: email,
