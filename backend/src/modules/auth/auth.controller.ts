@@ -28,14 +28,16 @@ export const registerUserController = CatchAsync(
 
 export const loginUserController = CatchAsync(
   async (req: Request, res: Response) => {
-    const { email, password } = req.body;
+    const { email, password, captchaToken } = req.body;
     const userAgent = req.headers["user-agent"] || "unknown";
     const ipAddress = req.ip || "unknown";
+
     const result = await authService.loginUser({
       email,
       password,
       userAgent,
       ipAddress,
+      captchaToken,
     });
     setCookie(res, result.refreshToken);
     sendResponse(res, 201, {

@@ -31,7 +31,6 @@ export async function registerUser(data: registerUserInput) {
 interface loginUserInput {
   email: string;
   password: string;
-
   captchaToken?: string;
 }
 export async function loginUser(data: loginUserInput) {
